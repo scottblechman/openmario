@@ -1,13 +1,23 @@
 package com.scottblechman.openmario.desktop;
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.scottblechman.openmario.OpenMario;
 
 public class DesktopLauncher {
+
+	private static final double WINDOW_SCALE = 2;
+
 	public static void main (String[] arg) {
-		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setTitle("OpenMario");
-		new Lwjgl3Application(new OpenMario(), config);
+		LwjglApplicationConfiguration config = createConfiguration();
+		new LwjglApplication(new OpenMario(), config);
+	}
+
+	private static LwjglApplicationConfiguration createConfiguration() {
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.resizable = false;
+		config.width = (int) (320 * WINDOW_SCALE);
+		config.height = (int) (240 * WINDOW_SCALE);
+		return config;
 	}
 }
