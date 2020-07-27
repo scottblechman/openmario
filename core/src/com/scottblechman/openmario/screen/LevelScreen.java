@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.scottblechman.openmario.OpenMario;
 import com.scottblechman.openmario.state.InputState;
+import com.scottblechman.openmario.state.MusicState;
 import com.scottblechman.openmario.viewmodel.LevelViewModel;
 
 import static com.scottblechman.openmario.state.InputState.*;
@@ -29,6 +30,7 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     public LevelScreen(OpenMario game) {
         this.game = game;
+        game.musicStateManager.setState(MusicState.OVERWORLD);
         camera = new OrthographicCamera();
         viewModel = new LevelViewModel();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
@@ -40,7 +42,7 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     @Override
     public void show() {
-
+        game.musicStateManager.play();
     }
 
     @Override
@@ -60,15 +62,15 @@ public class LevelScreen implements Screen, ScreenInterface {
     public void update() {
         // Input state should only be non-empty if a key is currently pressed.
         if(!Gdx.input.isKeyPressed(Input.Keys.ANY_KEY)) {
-            game.inputQueue.setState(NONE);
+            game.inputStateManager.setState(NONE);
         } else {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-                game.inputQueue.setState(LEFT);
+                game.inputStateManager.setState(LEFT);
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-                game.inputQueue.setState(RIGHT);
+                game.inputStateManager.setState(RIGHT);
         }
 
-        InputState inputEvent = game.inputQueue.getState();
+        InputState inputEvent = game.inputStateManager.getState();
         switch (inputEvent) {
             case LEFT:
                 viewModel.movePlayerLeft(game.windowScale, Gdx.graphics.getDeltaTime());

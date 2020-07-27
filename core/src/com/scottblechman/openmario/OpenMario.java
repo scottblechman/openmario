@@ -3,6 +3,8 @@ package com.scottblechman.openmario;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.scottblechman.openmario.state.InputStateManager;
+import com.scottblechman.openmario.state.MusicState;
+import com.scottblechman.openmario.state.MusicStateManager;
 import com.scottblechman.openmario.state.ScreenStateManager;
 
 public class OpenMario extends Game {
@@ -15,7 +17,9 @@ public class OpenMario extends Game {
 
 	public SpriteBatch batch;
 
-	public InputStateManager inputQueue;
+	public InputStateManager inputStateManager;
+	public MusicStateManager musicStateManager;
+	public ScreenStateManager screenStateManager;
 
 	public OpenMario(float[] windowState) {
 		// All values of windowState except window scale arrive as int
@@ -28,10 +32,10 @@ public class OpenMario extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		//noinspection unused (required to initialize state machine)
-		ScreenStateManager screenStateManager = new ScreenStateManager(this);
 
-		inputQueue = new InputStateManager();
+		inputStateManager = new InputStateManager();
+		musicStateManager = new MusicStateManager();
+		screenStateManager = new ScreenStateManager(this);
 	}
 
 	@Override
@@ -42,5 +46,6 @@ public class OpenMario extends Game {
 	@Override
 	public void dispose () {
 		batch.dispose();
+		musicStateManager.dispose();
 	}
 }

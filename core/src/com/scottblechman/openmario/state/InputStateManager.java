@@ -1,10 +1,5 @@
 package com.scottblechman.openmario.state;
 
-import com.scottblechman.openmario.state.InputState;
-
-import java.util.ArrayList;
-import java.util.Queue;
-
 public class InputStateManager {
 
     InputState state;
