@@ -2,7 +2,7 @@ package com.scottblechman.openmario;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.scottblechman.openmario.screen.LevelScreen;
+import com.scottblechman.openmario.state.InputStateManager;
 import com.scottblechman.openmario.state.ScreenStateManager;
 
 public class OpenMario extends Game {
@@ -14,6 +14,8 @@ public class OpenMario extends Game {
 	public final int BASE_TILE_SIZE;
 
 	public SpriteBatch batch;
+
+	public InputStateManager inputQueue;
 
 	public OpenMario(float[] windowState) {
 		// All values of windowState except window scale arrive as int
@@ -28,6 +30,8 @@ public class OpenMario extends Game {
 		batch = new SpriteBatch();
 		//noinspection unused (required to initialize state machine)
 		ScreenStateManager screenStateManager = new ScreenStateManager(this);
+
+		inputQueue = new InputStateManager();
 	}
 
 	@Override
