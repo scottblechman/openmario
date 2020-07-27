@@ -9,14 +9,8 @@ public class LevelViewModel {
 
     private final Vector2 playerPosition;
 
-    // Current camera bounds
-    private final Vector2 boundsBottomLeft;
-    private final Vector2 boundsTopRight;
-
     public LevelViewModel() {
         playerPosition = new Vector2(0, 0);
-        boundsBottomLeft = new Vector2(0, 0);
-        boundsTopRight = new Vector2(0, 0);
     }
 
     public Vector2 getPlayerPosition() {
@@ -29,13 +23,5 @@ public class LevelViewModel {
 
     public void movePlayerRight(float windowScale, float delta) {
         playerPosition.x += BASE_MOVEMENT * windowScale * delta;
-    }
-
-    public Vector2 getBoundsBottomLeft() {
-        return boundsBottomLeft;
-    }
-
-    public Vector2 getBoundsTopRight() {
-        return boundsTopRight;
     }
 }

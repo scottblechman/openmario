@@ -58,4 +58,16 @@ public class Level {
     public void setStartPosition(Vector2 startPosition) {
         this.startPosition = startPosition;
     }
+
+    public ArrayList<Block> getBlocksInBounds(int x, int y, int width, int height) {
+        System.out.println(x + ", " + y + ", " + width + ", " + height);
+        ArrayList<Block> blocksInBounds = new ArrayList<>();
+        for(Block block : blocks) {
+            if(block.getPosition().x >= x && block.getPosition().x <= block.getPosition().x + width
+            && block.getPosition().y >= y && block.getPosition().y <= block.getPosition().y + height) {
+                blocksInBounds.add(block);
+            }
+        }
+        return blocksInBounds;
+    }
 }

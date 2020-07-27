@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.scottblechman.openmario.OpenMario;
 import com.scottblechman.openmario.model.Block;
 import com.scottblechman.openmario.model.Level;
@@ -25,6 +26,9 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     OrthographicCamera camera;
 
+    // Tracks when the camera has changed its position
+    final Vector2 cameraPosition;
+
     final LevelViewModel viewModel;
 
     final Level level;
@@ -40,18 +44,24 @@ public class LevelScreen implements Screen, ScreenInterface {
     public LevelScreen(OpenMario game) {
         this.game = game;
         game.musicStateManager.setState(MusicState.OVERWORLD);
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
                 game.WINDOW_HEIGHT * game.windowScale);
+        cameraPosition = new Vector2(camera.position.x, camera.position.y);
+
         viewModel = new LevelViewModel();
+
         // TODO: 7/26/20 replace factory method with data interface
         level = MockLevelFactory.buildMockLevel();
 
         texturePlayer = new Texture("spritesheet/player1.jpg");
         textureTiles = new Texture("spritesheet/tile.png");
+
         rectPlayer = new Rectangle(viewModel.getPlayerPosition().x, viewModel.getPlayerPosition().y,
                 game.BASE_TILE_SIZE * game.windowScale, game.BASE_TILE_SIZE * game.windowScale);
         blocksInViewport = new ArrayList<>();
+        updateTilesInViewport();
     }
 
     @Override
@@ -101,6 +111,12 @@ public class LevelScreen implements Screen, ScreenInterface {
         }
 
         // TODO: 7/26/20 Update camera
+        if(camera.position.x != cameraPosition.x || camera.position.y != cameraPosition.y) {
+            cameraPosition.x = camera.position.x;
+            cameraPosition.y = camera.position.y;
+
+            updateTilesInViewport();
+        }
 
         rectPlayer.x = viewModel.getPlayerPosition().x;
         rectPlayer.y = viewModel.getPlayerPosition().y;
@@ -129,5 +145,38 @@ public class LevelScreen implements Screen, ScreenInterface {
     @Override
     public void dispose() {
         texturePlayer.dispose();
+    }
+
+    private void updateTilesInViewport() {
+        // Get the bottom left map coordinates
+        float cameraLeft = camera.position.x - (camera.viewportWidth / 2);
+        float cameraBottom = camera.position.y - (camera.viewportHeight / 2);
+        int viewportStartX = (int) (cameraLeft / game.BASE_TILE_SIZE / game.windowScale);
+        int viewportStartY = (int) (cameraBottom / game.BASE_TILE_SIZE / game.windowScale);
+
+
+        // Remove blocks no longer in viewport
+        if(blocksInViewport.size() > 0) {
+            for (Rectangle block : blocksInViewport) {
+                if (block.x < camera.position.x ||
+                        block.x > camera.position.x + (game.WINDOW_WIDTH * game.windowScale) ||
+                        block.y < camera.position.y ||
+                        block.y > camera.position.y + (game.WINDOW_HEIGHT * game.windowScale)) {
+                    blocksInViewport.remove(block);
+                }
+            }
+        }
+
+        // Add new blocks to viewport
+        ArrayList<Block> blocksInBounds = level.getBlocksInBounds(
+                viewportStartX, viewportStartY,
+                (int) (game.WINDOW_WIDTH * game.windowScale) / game.BASE_TILE_SIZE,
+                (int) (game.WINDOW_HEIGHT * game.windowScale) / game.BASE_TILE_SIZE);
+        for(Block block : blocksInBounds) {
+            float tileSize = game.BASE_TILE_SIZE * game.windowScale;
+            Rectangle rect = new Rectangle(block.getPosition().x * tileSize, block.getPosition().y * tileSize,
+                    tileSize, tileSize);
+            blocksInViewport.add(rect);
+        }
     }
 }

@@ -13,6 +13,8 @@ public class MockLevelFactory {
         level.setStartPosition(new Vector2(0, 1));
 
         level.addBlock(new Block(new Vector2(0, 0)));
+        level.addBlock(new Block(new Vector2(1, 0)));
+        level.addBlock(new Block(new Vector2(2, 0)));
 
         return level;
     }
