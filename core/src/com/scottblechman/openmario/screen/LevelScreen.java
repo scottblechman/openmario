@@ -8,9 +8,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.scottblechman.openmario.OpenMario;
+import com.scottblechman.openmario.model.Block;
+import com.scottblechman.openmario.model.Level;
+import com.scottblechman.openmario.model.mock.MockLevelFactory;
 import com.scottblechman.openmario.state.InputState;
 import com.scottblechman.openmario.state.MusicState;
 import com.scottblechman.openmario.viewmodel.LevelViewModel;
+
+import java.util.ArrayList;
 
 import static com.scottblechman.openmario.state.InputState.*;
 
@@ -22,22 +27,31 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     final LevelViewModel viewModel;
 
+    final Level level;
+
     // Sprite sheets
     Texture texturePlayer;
+    Texture textureTiles;
 
     // Entity geometry
     Rectangle rectPlayer;
+    ArrayList<Rectangle> blocksInViewport;
 
     public LevelScreen(OpenMario game) {
         this.game = game;
         game.musicStateManager.setState(MusicState.OVERWORLD);
         camera = new OrthographicCamera();
-        viewModel = new LevelViewModel();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
                 game.WINDOW_HEIGHT * game.windowScale);
-        texturePlayer = new Texture("spritesheet-player1.jpg");
+        viewModel = new LevelViewModel();
+        // TODO: 7/26/20 replace factory method with data interface
+        level = MockLevelFactory.buildMockLevel();
+
+        texturePlayer = new Texture("spritesheet/player1.jpg");
+        textureTiles = new Texture("spritesheet/tile.png");
         rectPlayer = new Rectangle(viewModel.getPlayerPosition().x, viewModel.getPlayerPosition().y,
                 game.BASE_TILE_SIZE * game.windowScale, game.BASE_TILE_SIZE * game.windowScale);
+        blocksInViewport = new ArrayList<>();
     }
 
     @Override
@@ -54,6 +68,9 @@ public class LevelScreen implements Screen, ScreenInterface {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
+        for(Rectangle block : blocksInViewport) {
+            game.batch.draw(texturePlayer, block.x, block.y, block.width, block.height);
+        }
         game.batch.draw(texturePlayer, rectPlayer.x, rectPlayer.y, rectPlayer.width, rectPlayer.height);
         game.batch.end();
     }
@@ -82,6 +99,8 @@ public class LevelScreen implements Screen, ScreenInterface {
             default:
                 break;
         }
+
+        // TODO: 7/26/20 Update camera
 
         rectPlayer.x = viewModel.getPlayerPosition().x;
         rectPlayer.y = viewModel.getPlayerPosition().y;
