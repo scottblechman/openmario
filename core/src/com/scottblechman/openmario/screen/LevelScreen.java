@@ -35,7 +35,7 @@ public class LevelScreen implements Screen, ScreenInterface {
         viewModel = new LevelViewModel();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
                 game.WINDOW_HEIGHT * game.windowScale);
-        texturePlayer = new Texture("badlogic.jpg");
+        texturePlayer = new Texture("spritesheet-player1.jpg");
         rectPlayer = new Rectangle(viewModel.getPlayerPosition().x, viewModel.getPlayerPosition().y,
                 game.BASE_TILE_SIZE * game.windowScale, game.BASE_TILE_SIZE * game.windowScale);
     }
