@@ -1,6 +1,6 @@
 package com.scottblechman.openmario.viewmodel;
 
-import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.scottblechman.openmario.OpenMario;
@@ -8,6 +8,7 @@ import com.scottblechman.openmario.data.CsvReader;
 import com.scottblechman.openmario.model.Block;
 import com.scottblechman.openmario.model.Level;
 import com.scottblechman.openmario.model.LevelType;
+import com.scottblechman.openmario.model.Player;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public class LevelViewModel {
 
     private final int BASE_MOVEMENT = 200;
 
-    private final Vector2 playerPosition;
+    private final Player player;
 
     // Tracks when the camera position needs updating
     private final Vector2 lastCameraPosition;
@@ -27,10 +28,11 @@ public class LevelViewModel {
     public LevelViewModel(OpenMario game, String levelName) {
         this.game = game;
         level = CsvReader.readLevelData(levelName);
+        player = new Player();
 
         // Read level metadata
         game.musicStateManager.setState(level.getMusicState());
-        playerPosition = new Vector2(level.getStartPosition().x * getTileToPixelMultiplier(),
+        setPlayerPosition(level.getStartPosition().x * getTileToPixelMultiplier(),
                 level.getStartPosition().y * getTileToPixelMultiplier());
 
         lastCameraPosition = new Vector2(0, 0);
@@ -45,16 +47,15 @@ public class LevelViewModel {
     }
 
     public boolean canAdvanceCamera(Vector3 position) {
-        return playerPosition.x > position.x;
+        return player.getPosition().x > position.x;
     }
 
     public Vector2 getPlayerPosition() {
-        return playerPosition;
+        return player.getPosition();
     }
 
     public void setPlayerPosition(float x, float y) {
-        this.playerPosition.x = x;
-        this.playerPosition.y = y;
+        player.setPosition(new Vector2(x, y));
     }
 
     public boolean cameraPositionChanged(Vector3 currentPosition) {
@@ -68,11 +69,15 @@ public class LevelViewModel {
     }
 
     public void movePlayerLeft(float windowScale, float delta) {
-        playerPosition.x -= BASE_MOVEMENT * windowScale * delta;
+        player.getPosition().x -= BASE_MOVEMENT * windowScale * delta;
     }
 
     public void movePlayerRight(float windowScale, float delta) {
-        playerPosition.x += BASE_MOVEMENT * windowScale * delta;
+        player.getPosition().x += BASE_MOVEMENT * windowScale * delta;
+    }
+
+    public void updatePlayerForces() {
+        player.update(Gdx.graphics.getDeltaTime());
     }
 
     public int getBaseMovement() {

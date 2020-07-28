@@ -134,6 +134,8 @@ public class LevelScreen implements Screen, ScreenInterface {
             updateTilesInViewport();
         }
 
+        viewModel.updatePlayerForces();
+
         rectPlayer.x = viewModel.getPlayerPosition().x;
         rectPlayer.y = viewModel.getPlayerPosition().y;
     }
