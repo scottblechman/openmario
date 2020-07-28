@@ -10,9 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.scottblechman.openmario.OpenMario;
-import com.scottblechman.openmario.data.CsvReader;
 import com.scottblechman.openmario.model.Block;
-import com.scottblechman.openmario.model.Level;
 import com.scottblechman.openmario.state.InputState;
 import com.scottblechman.openmario.util.TextureUtil;
 import com.scottblechman.openmario.viewmodel.LevelViewModel;
@@ -27,12 +25,7 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     OrthographicCamera camera;
 
-    // Tracks when the camera has changed its position
-    final Vector2 cameraPosition;
-
     final LevelViewModel viewModel;
-
-    final Level level;
 
     // Sprite sheets
     Texture texturePlayer;
@@ -48,16 +41,8 @@ public class LevelScreen implements Screen, ScreenInterface {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
                 game.WINDOW_HEIGHT * game.windowScale);
-        cameraPosition = new Vector2(camera.position.x, camera.position.y);
 
-        viewModel = new LevelViewModel();
-
-        level = CsvReader.readLevelData(levelName);
-
-        // Read level metadata
-        game.musicStateManager.setState(level.getMusicState());
-        viewModel.setPlayerPosition(level.getStartPosition().x * getTileToPixelMultiplier(),
-                level.getStartPosition().y * getTileToPixelMultiplier());
+        viewModel = new LevelViewModel(game, levelName, camera);
 
         texturePlayer = new Texture("spritesheet/player1.jpg");
         textureTiles = new Texture("spritesheet/tile.png");
@@ -66,6 +51,7 @@ public class LevelScreen implements Screen, ScreenInterface {
                 viewModel.getPlayerPosition().y,
                 getTileToPixelMultiplier(),
                 getTileToPixelMultiplier());
+
         blocksInViewport = new ArrayList<>();
         updateTilesInViewport();
     }
@@ -79,7 +65,7 @@ public class LevelScreen implements Screen, ScreenInterface {
     public void render(float delta) {
         update();
 
-        switch(level.getLevelType()) {
+        switch(viewModel.getLevelType()) {
             case OVERWORLD:
                 Gdx.gl.glClearColor(126f/255f, 154f/255f, 238f/255f, 1);
                 break;
@@ -90,7 +76,9 @@ public class LevelScreen implements Screen, ScreenInterface {
                 break;
         }
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         camera.update();
+
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
@@ -133,10 +121,8 @@ public class LevelScreen implements Screen, ScreenInterface {
                 break;
         }
 
-        if(camera.position.x != cameraPosition.x || camera.position.y != cameraPosition.y) {
-            cameraPosition.x = camera.position.x;
-            cameraPosition.y = camera.position.y;
-
+        if(viewModel.cameraPositionChanged(camera.position)) {
+            viewModel.setLastCameraPosition(camera.position);
             updateTilesInViewport();
         }
 
@@ -196,7 +182,7 @@ public class LevelScreen implements Screen, ScreenInterface {
         }
 
         // Add new blocks to viewport
-        ArrayList<Block> blocksInBounds = level.getBlocksInBounds(viewportStartX, viewportStartY,
+        ArrayList<Block> blocksInBounds = viewModel.getBlocksInBounds(viewportStartX, viewportStartY,
                 viewportWidth, viewportHeight);
         blocksInViewport.addAll(blocksInBounds);
     }
