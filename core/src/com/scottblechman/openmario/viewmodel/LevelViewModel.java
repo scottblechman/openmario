@@ -24,7 +24,7 @@ public class LevelViewModel {
     // Tracks when the camera position needs updating
     private final Vector2 lastCameraPosition;
 
-    public LevelViewModel(OpenMario game, String levelName, Camera camera) {
+    public LevelViewModel(OpenMario game, String levelName) {
         this.game = game;
         level = CsvReader.readLevelData(levelName);
 
@@ -33,7 +33,7 @@ public class LevelViewModel {
         playerPosition = new Vector2(level.getStartPosition().x * getTileToPixelMultiplier(),
                 level.getStartPosition().y * getTileToPixelMultiplier());
 
-        lastCameraPosition = new Vector2(camera.position.x, camera.position.y);
+        lastCameraPosition = new Vector2(0, 0);
     }
 
     public LevelType getLevelType() {
@@ -42,6 +42,10 @@ public class LevelViewModel {
 
     public ArrayList<Block> getBlocksInBounds(int x, int y, int width, int height) {
         return level.getBlocksInBounds(x, y, width, height);
+    }
+
+    public boolean canAdvanceCamera(Vector3 position) {
+        return playerPosition.x > position.x;
     }
 
     public Vector2 getPlayerPosition() {
@@ -69,6 +73,10 @@ public class LevelViewModel {
 
     public void movePlayerRight(float windowScale, float delta) {
         playerPosition.x += BASE_MOVEMENT * windowScale * delta;
+    }
+
+    public int getBaseMovement() {
+        return BASE_MOVEMENT;
     }
 
     private float getTileToPixelMultiplier() {

@@ -38,11 +38,12 @@ public class LevelScreen implements Screen, ScreenInterface {
     public LevelScreen(OpenMario game, String levelName) {
         this.game = game;
 
+        viewModel = new LevelViewModel(game, levelName);
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
                 game.WINDOW_HEIGHT * game.windowScale);
-
-        viewModel = new LevelViewModel(game, levelName, camera);
+        viewModel.setLastCameraPosition(camera.position);
 
         texturePlayer = new Texture("spritesheet/player1.jpg");
         textureTiles = new Texture("spritesheet/tile.png");
@@ -111,7 +112,9 @@ public class LevelScreen implements Screen, ScreenInterface {
         InputState inputEvent = game.inputStateManager.getState();
         switch (inputEvent) {
             case LEFT:
-                viewModel.movePlayerLeft(game.windowScale, Gdx.graphics.getDeltaTime());
+                if(viewModel.getPlayerPosition().x > camera.position.x - camera.viewportWidth / 2) {
+                    viewModel.movePlayerLeft(game.windowScale, Gdx.graphics.getDeltaTime());
+                }
                 break;
             case RIGHT:
                 viewModel.movePlayerRight(game.windowScale, Gdx.graphics.getDeltaTime());
@@ -119,6 +122,11 @@ public class LevelScreen implements Screen, ScreenInterface {
             case NONE:
             default:
                 break;
+        }
+
+        if(viewModel.canAdvanceCamera(camera.position)) {
+            camera.position.x += viewModel.getBaseMovement()
+                    * game.windowScale * Gdx.graphics.getDeltaTime();
         }
 
         if(viewModel.cameraPositionChanged(camera.position)) {
@@ -160,6 +168,8 @@ public class LevelScreen implements Screen, ScreenInterface {
     }
 
     private void updateTilesInViewport() {
+        blocksInViewport = new ArrayList<>();
+
         // Get the bottom left map coordinates
         float cameraLeft = camera.position.x - (camera.viewportWidth / 2);
         float cameraBottom = camera.position.y - (camera.viewportHeight / 2);
@@ -168,18 +178,6 @@ public class LevelScreen implements Screen, ScreenInterface {
         int viewportStartY = (int) (cameraBottom / game.BASE_TILE_SIZE / game.windowScale);
         int viewportWidth = (int) (game.WINDOW_WIDTH * game.windowScale) / game.BASE_TILE_SIZE;
         int viewportHeight = (int) (game.WINDOW_HEIGHT * game.windowScale) / game.BASE_TILE_SIZE;
-
-        // Remove blocks no longer in viewport
-        if(blocksInViewport.size() > 0) {
-            for (Block block : blocksInViewport) {
-                if (block.getPosition().x < viewportStartX ||
-                        block.getPosition().x > viewportStartX + viewportWidth ||
-                        block.getPosition().y < viewportStartY ||
-                        block.getPosition().y > viewportStartY + viewportHeight) {
-                    blocksInViewport.remove(block);
-                }
-            }
-        }
 
         // Add new blocks to viewport
         ArrayList<Block> blocksInBounds = viewModel.getBlocksInBounds(viewportStartX, viewportStartY,
