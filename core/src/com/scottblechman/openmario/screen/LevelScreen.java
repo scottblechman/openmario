@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.scottblechman.openmario.OpenMario;
+import com.scottblechman.openmario.data.CsvReader;
 import com.scottblechman.openmario.model.Block;
 import com.scottblechman.openmario.model.Level;
 import com.scottblechman.openmario.model.mock.MockLevelFactory;
@@ -43,9 +44,8 @@ public class LevelScreen implements Screen, ScreenInterface {
     Rectangle rectPlayer;
     ArrayList<Block> blocksInViewport;
 
-    public LevelScreen(OpenMario game) {
+    public LevelScreen(OpenMario game, String levelName) {
         this.game = game;
-        game.musicStateManager.setState(MusicState.OVERWORLD);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.WINDOW_WIDTH * game.windowScale,
@@ -54,10 +54,10 @@ public class LevelScreen implements Screen, ScreenInterface {
 
         viewModel = new LevelViewModel();
 
-        // TODO: 7/26/20 replace factory method with data interface
-        level = MockLevelFactory.buildMockLevel();
+        level = CsvReader.readLevelData(levelName);
 
         // Read level metadata
+        game.musicStateManager.setState(level.getMusicState());
         viewModel.setPlayerPosition(level.getStartPosition().x * getTileToPixelMultiplier(),
                 level.getStartPosition().y * getTileToPixelMultiplier());
 
