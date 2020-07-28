@@ -13,9 +13,7 @@ import com.scottblechman.openmario.OpenMario;
 import com.scottblechman.openmario.data.CsvReader;
 import com.scottblechman.openmario.model.Block;
 import com.scottblechman.openmario.model.Level;
-import com.scottblechman.openmario.model.mock.MockLevelFactory;
 import com.scottblechman.openmario.state.InputState;
-import com.scottblechman.openmario.state.MusicState;
 import com.scottblechman.openmario.util.TextureUtil;
 import com.scottblechman.openmario.viewmodel.LevelViewModel;
 
@@ -81,7 +79,16 @@ public class LevelScreen implements Screen, ScreenInterface {
     public void render(float delta) {
         update();
 
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        switch(level.getLevelType()) {
+            case OVERWORLD:
+                Gdx.gl.glClearColor(126f/255f, 154f/255f, 238f/255f, 1);
+                break;
+            case CASTLE:
+            case NONE:
+            default:
+                Gdx.gl.glClearColor(0, 0, 0, 1);
+                break;
+        }
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);

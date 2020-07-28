@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.scottblechman.openmario.model.Block;
 import com.scottblechman.openmario.model.BlockType;
 import com.scottblechman.openmario.model.Level;
+import com.scottblechman.openmario.model.LevelType;
 import com.scottblechman.openmario.state.MusicState;
 
 public class CsvReader {
@@ -49,6 +50,10 @@ public class CsvReader {
                 float startY = Float.parseFloat(tokens[2]);
                 level.setStartPosition(new Vector2(startX, startY));
                 break;
+            case "type":
+                String type = tokens[1];
+                setLevelType(type, level);
+                break;
             case "block":
                 addBlockToLevel(tokens, level);
                 break;
@@ -66,6 +71,22 @@ public class CsvReader {
         switch(musicType) {
             case "overworld":
                 level.setMusicState(MusicState.OVERWORLD);
+                break;
+            default:
+                level.setMusicState(MusicState.NONE);
+                break;
+        }
+    }
+
+    /**
+     *
+     * @param levelType -
+     * @param level -
+     */
+    private static void setLevelType(String levelType, Level level) {
+        switch(levelType) {
+            case "overworld":
+                level.setLevelType(LevelType.OVERWORLD);
                 break;
             default:
                 level.setMusicState(MusicState.NONE);

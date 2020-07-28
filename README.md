@@ -46,6 +46,7 @@ The metadata currently available for a level is as follows:
 
 | Key | Value |
 | --- | --- |
+| type | Type of the level (overworld, etc.)
 | music | Background music for the level |
 | nextlevel | The level to be loaded after ending the current level |
 | startpos | Player start coordinates on map (split into two columns) |

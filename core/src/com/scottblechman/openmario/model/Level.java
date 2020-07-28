@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class Level {
 
+    private LevelType levelType;
     private String nextLevel;
     private MusicState musicState;
     private Vector2 startPosition;
@@ -69,5 +70,13 @@ public class Level {
             }
         }
         return blocksInBounds;
+    }
+
+    public LevelType getLevelType() {
+        return levelType;
+    }
+
+    public void setLevelType(LevelType levelType) {
+        this.levelType = levelType;
     }
 }
