@@ -1,6 +1,5 @@
 package com.scottblechman.openmario.viewmodel;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 public class LevelViewModel {
@@ -15,6 +14,11 @@ public class LevelViewModel {
 
     public Vector2 getPlayerPosition() {
         return playerPosition;
+    }
+
+    public void setPlayerPosition(float x, float y) {
+        this.playerPosition.x = x;
+        this.playerPosition.y = y;
     }
 
     public void movePlayerLeft(float windowScale, float delta) {

@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.scottblechman.openmario.OpenMario;
@@ -14,6 +15,7 @@ import com.scottblechman.openmario.model.Level;
 import com.scottblechman.openmario.model.mock.MockLevelFactory;
 import com.scottblechman.openmario.state.InputState;
 import com.scottblechman.openmario.state.MusicState;
+import com.scottblechman.openmario.util.TextureUtil;
 import com.scottblechman.openmario.viewmodel.LevelViewModel;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     // Entity geometry
     Rectangle rectPlayer;
-    ArrayList<Rectangle> blocksInViewport;
+    ArrayList<Block> blocksInViewport;
 
     public LevelScreen(OpenMario game) {
         this.game = game;
@@ -55,11 +57,17 @@ public class LevelScreen implements Screen, ScreenInterface {
         // TODO: 7/26/20 replace factory method with data interface
         level = MockLevelFactory.buildMockLevel();
 
+        // Read level metadata
+        viewModel.setPlayerPosition(level.getStartPosition().x * getTileToPixelMultiplier(),
+                level.getStartPosition().y * getTileToPixelMultiplier());
+
         texturePlayer = new Texture("spritesheet/player1.jpg");
         textureTiles = new Texture("spritesheet/tile.png");
 
-        rectPlayer = new Rectangle(viewModel.getPlayerPosition().x, viewModel.getPlayerPosition().y,
-                game.BASE_TILE_SIZE * game.windowScale, game.BASE_TILE_SIZE * game.windowScale);
+        rectPlayer = new Rectangle(viewModel.getPlayerPosition().x,
+                viewModel.getPlayerPosition().y,
+                getTileToPixelMultiplier(),
+                getTileToPixelMultiplier());
         blocksInViewport = new ArrayList<>();
         updateTilesInViewport();
     }
@@ -78,9 +86,17 @@ public class LevelScreen implements Screen, ScreenInterface {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
-        for(Rectangle block : blocksInViewport) {
-            game.batch.draw(texturePlayer, block.x, block.y, block.width, block.height);
+
+        // Draw blocks
+        for(Block block : blocksInViewport) {
+            Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
+                    block.getPosition().y * getTileToPixelMultiplier(),
+                    getTileToPixelMultiplier(), getTileToPixelMultiplier());
+            Vector2 index = TextureUtil.getBlockRegionIndex(block.getType(), game.BASE_TILE_SIZE);
+            TextureRegion region = new TextureRegion(textureTiles, (int) index.x, (int) index.y, 16, 16);
+            game.batch.draw(region, rect.x, rect.y, rect.width, rect.height);
         }
+
         game.batch.draw(texturePlayer, rectPlayer.x, rectPlayer.y, rectPlayer.width, rectPlayer.height);
         game.batch.end();
     }
@@ -110,7 +126,6 @@ public class LevelScreen implements Screen, ScreenInterface {
                 break;
         }
 
-        // TODO: 7/26/20 Update camera
         if(camera.position.x != cameraPosition.x || camera.position.y != cameraPosition.y) {
             cameraPosition.x = camera.position.x;
             cameraPosition.y = camera.position.y;
@@ -147,36 +162,35 @@ public class LevelScreen implements Screen, ScreenInterface {
         texturePlayer.dispose();
     }
 
+    private float getTileToPixelMultiplier() {
+        return game.BASE_TILE_SIZE * game.windowScale;
+    }
+
     private void updateTilesInViewport() {
         // Get the bottom left map coordinates
         float cameraLeft = camera.position.x - (camera.viewportWidth / 2);
         float cameraBottom = camera.position.y - (camera.viewportHeight / 2);
+
         int viewportStartX = (int) (cameraLeft / game.BASE_TILE_SIZE / game.windowScale);
         int viewportStartY = (int) (cameraBottom / game.BASE_TILE_SIZE / game.windowScale);
-
+        int viewportWidth = (int) (game.WINDOW_WIDTH * game.windowScale) / game.BASE_TILE_SIZE;
+        int viewportHeight = (int) (game.WINDOW_HEIGHT * game.windowScale) / game.BASE_TILE_SIZE;
 
         // Remove blocks no longer in viewport
         if(blocksInViewport.size() > 0) {
-            for (Rectangle block : blocksInViewport) {
-                if (block.x < camera.position.x ||
-                        block.x > camera.position.x + (game.WINDOW_WIDTH * game.windowScale) ||
-                        block.y < camera.position.y ||
-                        block.y > camera.position.y + (game.WINDOW_HEIGHT * game.windowScale)) {
+            for (Block block : blocksInViewport) {
+                if (block.getPosition().x < viewportStartX ||
+                        block.getPosition().x > viewportStartX + viewportWidth ||
+                        block.getPosition().y < viewportStartY ||
+                        block.getPosition().y > viewportStartY + viewportHeight) {
                     blocksInViewport.remove(block);
                 }
             }
         }
 
         // Add new blocks to viewport
-        ArrayList<Block> blocksInBounds = level.getBlocksInBounds(
-                viewportStartX, viewportStartY,
-                (int) (game.WINDOW_WIDTH * game.windowScale) / game.BASE_TILE_SIZE,
-                (int) (game.WINDOW_HEIGHT * game.windowScale) / game.BASE_TILE_SIZE);
-        for(Block block : blocksInBounds) {
-            float tileSize = game.BASE_TILE_SIZE * game.windowScale;
-            Rectangle rect = new Rectangle(block.getPosition().x * tileSize, block.getPosition().y * tileSize,
-                    tileSize, tileSize);
-            blocksInViewport.add(rect);
-        }
+        ArrayList<Block> blocksInBounds = level.getBlocksInBounds(viewportStartX, viewportStartY,
+                viewportWidth, viewportHeight);
+        blocksInViewport.addAll(blocksInBounds);
     }
 }
