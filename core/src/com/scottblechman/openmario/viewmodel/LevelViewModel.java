@@ -78,6 +78,10 @@ public class LevelViewModel {
         player.getPosition().x += BASE_MOVEMENT * windowScale * delta;
     }
 
+    public void playerJump(float delta) {
+        player.addAcceleration(0, 300);
+    }
+
     public void updatePlayerForces() {
         player.update(Gdx.graphics.getDeltaTime());
     }
@@ -88,13 +92,29 @@ public class LevelViewModel {
 
     public boolean playerIsOnSurface(ArrayList<Block> blocksToCheck) {
         Rectangle playerIfMoved = new Rectangle(player.getPosition().x,
-                player.getPosition().y -9.8f,
+                player.getPosition().y - 1,
                 getTileToPixelMultiplier(), getTileToPixelMultiplier());
         for(Block block : blocksToCheck) {
             Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
                     block.getPosition().y * getTileToPixelMultiplier(),
                     getTileToPixelMultiplier(), getTileToPixelMultiplier());
             if(playerIfMoved.overlaps(rect)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean playerIntersectingBlock(ArrayList<Block> blocksToCheck) {
+        Rectangle playerRect = new Rectangle(player.getPosition().x,
+                player.getPosition().y,
+                getTileToPixelMultiplier(), getTileToPixelMultiplier());
+        for(Block block : blocksToCheck) {
+            Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
+                    block.getPosition().y * getTileToPixelMultiplier(),
+                    getTileToPixelMultiplier(), getTileToPixelMultiplier());
+            if(playerRect.overlaps(rect)) {
                 return true;
             }
         }

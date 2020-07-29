@@ -63,18 +63,24 @@ public class Player {
         this.acceleration.y = acceleration.y;
     }
 
+    public void addAcceleration(float x, float y) {
+        this.acceleration.x += x;
+        this.acceleration.y += y;
+    }
+
     public void setOnSurface(boolean onSurface) {
         isOnSurface = onSurface;
     }
 
     public void update(float delta) {
-        // Reset velocity for clean calculation
-        velocity.x = 0;
-        velocity.y = 0;
+        velocity.x += acceleration.x;
+        velocity.y += acceleration.y ;
+
+        velocity.y += gravityAcceleration.y;
 
         // Update velocity from external forces
-        if(!isOnSurface) {
-            velocity.y += gravityAcceleration.y * MASS;
+        if(isOnSurface && velocity.y < 0) {
+            velocity.y = 0;
         }
 
         // Update position from velocity
@@ -83,5 +89,8 @@ public class Player {
 
         // Reset external forces
         isOnSurface = false;
+
+        // Reset acceleration
+        setAcceleration(new Vector2(0, 0));
     }
 }

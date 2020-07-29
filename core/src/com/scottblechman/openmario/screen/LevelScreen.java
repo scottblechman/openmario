@@ -107,6 +107,8 @@ public class LevelScreen implements Screen, ScreenInterface {
                 game.inputStateManager.setState(LEFT);
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
                 game.inputStateManager.setState(RIGHT);
+            if (Gdx.input.isKeyPressed(Input.Keys.SPACE))
+                game.inputStateManager.setState(JUMP);
         }
 
         InputState inputEvent = game.inputStateManager.getState();
@@ -119,6 +121,9 @@ public class LevelScreen implements Screen, ScreenInterface {
             case RIGHT:
                 viewModel.movePlayerRight(game.windowScale, Gdx.graphics.getDeltaTime());
                 break;
+            case JUMP:
+                if(viewModel.playerIsOnSurface(blocksInViewport))
+                    viewModel.playerJump(Gdx.graphics.getDeltaTime());
             case NONE:
             default:
                 break;
