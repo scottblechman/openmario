@@ -79,7 +79,7 @@ public class LevelViewModel {
     }
 
     public void playerJump(float delta) {
-        player.addAcceleration(0, 300);
+        player.addAcceleration(0, 400);
     }
 
     public void updatePlayerForces() {
@@ -99,22 +99,6 @@ public class LevelViewModel {
                     block.getPosition().y * getTileToPixelMultiplier(),
                     getTileToPixelMultiplier(), getTileToPixelMultiplier());
             if(playerIfMoved.overlaps(rect)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public boolean playerIntersectingBlock(ArrayList<Block> blocksToCheck) {
-        Rectangle playerRect = new Rectangle(player.getPosition().x,
-                player.getPosition().y,
-                getTileToPixelMultiplier(), getTileToPixelMultiplier());
-        for(Block block : blocksToCheck) {
-            Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
-                    block.getPosition().y * getTileToPixelMultiplier(),
-                    getTileToPixelMultiplier(), getTileToPixelMultiplier());
-            if(playerRect.overlaps(rect)) {
                 return true;
             }
         }

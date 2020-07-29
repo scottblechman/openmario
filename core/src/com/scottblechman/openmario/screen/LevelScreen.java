@@ -146,6 +146,53 @@ public class LevelScreen implements Screen, ScreenInterface {
 
         rectPlayer.x = viewModel.getPlayerPosition().x;
         rectPlayer.y = viewModel.getPlayerPosition().y;
+        if(yDirectionCollision()) {
+            rectPlayer.setPosition(new Vector2(rectPlayer.x, snapToGrid(rectPlayer.y)));
+            viewModel.setPlayerPosition(viewModel.getPlayerPosition().x, rectPlayer.y);
+        } else if(xDirectionCollision()) {
+            rectPlayer.setPosition(new Vector2(snapToGrid(rectPlayer.x), rectPlayer.y));
+            viewModel.setPlayerPosition(rectPlayer.x, viewModel.getPlayerPosition().y);
+        }
+    }
+
+    private boolean yDirectionCollision() {
+        for(Block block : blocksInViewport) {
+            Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
+                    block.getPosition().y * getTileToPixelMultiplier(),
+                    getTileToPixelMultiplier(), getTileToPixelMultiplier());
+
+            if(rectPlayer.overlaps(rect) && rect.y != rectPlayer.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean xDirectionCollision() {
+        for(Block block : blocksInViewport) {
+            Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
+                    block.getPosition().y * getTileToPixelMultiplier(),
+                    getTileToPixelMultiplier(), getTileToPixelMultiplier());
+
+            if(rectPlayer.overlaps(rect) && rect.x != rectPlayer.x) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int snapToGrid(float f) {
+        int nearestLow = (int) f;
+        int nearestHigh = (int) f;
+        while(nearestLow % getTileToPixelMultiplier() != 0) {
+            nearestLow--;
+        }
+        while(nearestHigh % getTileToPixelMultiplier() != 0) {
+            nearestHigh++;
+        }
+        if((nearestHigh - f) > (f - nearestLow))
+                return nearestLow;
+        return nearestHigh;
     }
 
     @Override
