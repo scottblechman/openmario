@@ -134,6 +134,9 @@ public class LevelScreen implements Screen, ScreenInterface {
             updateTilesInViewport();
         }
 
+        if(viewModel.playerIsOnSurface(blocksInViewport)) {
+            viewModel.applyBottomForce();
+        }
         viewModel.updatePlayerForces();
 
         rectPlayer.x = viewModel.getPlayerPosition().x;
@@ -170,6 +173,7 @@ public class LevelScreen implements Screen, ScreenInterface {
     }
 
     private void updateTilesInViewport() {
+        int size = blocksInViewport.size();
         blocksInViewport = new ArrayList<>();
 
         // Get the bottom left map coordinates

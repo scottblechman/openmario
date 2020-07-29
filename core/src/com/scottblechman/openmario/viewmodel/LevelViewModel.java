@@ -1,6 +1,7 @@
 package com.scottblechman.openmario.viewmodel;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.scottblechman.openmario.OpenMario;
@@ -10,6 +11,7 @@ import com.scottblechman.openmario.model.Level;
 import com.scottblechman.openmario.model.LevelType;
 import com.scottblechman.openmario.model.Player;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class LevelViewModel {
@@ -78,6 +80,26 @@ public class LevelViewModel {
 
     public void updatePlayerForces() {
         player.update(Gdx.graphics.getDeltaTime());
+    }
+
+    public void applyBottomForce() {
+        player.setOnSurface(true);
+    }
+
+    public boolean playerIsOnSurface(ArrayList<Block> blocksToCheck) {
+        Rectangle playerIfMoved = new Rectangle(player.getPosition().x,
+                player.getPosition().y -9.8f,
+                getTileToPixelMultiplier(), getTileToPixelMultiplier());
+        for(Block block : blocksToCheck) {
+            Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
+                    block.getPosition().y * getTileToPixelMultiplier(),
+                    getTileToPixelMultiplier(), getTileToPixelMultiplier());
+            if(playerIfMoved.overlaps(rect)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public int getBaseMovement() {

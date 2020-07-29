@@ -61,7 +61,7 @@ public class Level {
     }
 
     public ArrayList<Block> getBlocksInBounds(int x, int y, int width, int height) {
-        System.out.println(x + ", " + y + ", " + width + ", " + height);
+        //System.out.println(x + ", " + y + ", " + width + ", " + height);
         ArrayList<Block> blocksInBounds = new ArrayList<>();
         for(Block block : blocks) {
             if(block.getPosition().x >= x && block.getPosition().x <= block.getPosition().x + width

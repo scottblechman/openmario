@@ -12,6 +12,7 @@ public class Player {
 
     // External forces
     private final Vector2 gravityAcceleration;
+    private boolean isOnSurface;    // Used to determine if gravity should apply
 
     public Player() {
         this.position = new Vector2(0,0);
@@ -19,6 +20,7 @@ public class Player {
         this.acceleration = new Vector2(0, 0);
 
         this.gravityAcceleration = new Vector2(0, -9.8f);
+        this.isOnSurface = false;
     }
 
     public Player(Vector2 position, Vector2 velocity, Vector2 acceleration) {
@@ -27,6 +29,7 @@ public class Player {
         this.acceleration = acceleration;
 
         this.gravityAcceleration = new Vector2(0, -9.8f);
+        this.isOnSurface = false;
     }
 
     public Vector2 getPosition() {
@@ -39,6 +42,10 @@ public class Player {
 
     public Vector2 getAcceleration() {
         return acceleration;
+    }
+
+    public int getMass() {
+        return MASS;
     }
 
     public void setPosition(Vector2 position) {
@@ -56,16 +63,25 @@ public class Player {
         this.acceleration.y = acceleration.y;
     }
 
+    public void setOnSurface(boolean onSurface) {
+        isOnSurface = onSurface;
+    }
+
     public void update(float delta) {
         // Reset velocity for clean calculation
         velocity.x = 0;
         velocity.y = 0;
 
         // Update velocity from external forces
-        velocity.y += gravityAcceleration.y * MASS;
+        if(!isOnSurface) {
+            velocity.y += gravityAcceleration.y * MASS;
+        }
 
         // Update position from velocity
         position.x += velocity.x * delta;
         position.y += velocity.y * delta;
+
+        // Reset external forces
+        isOnSurface = false;
     }
 }
