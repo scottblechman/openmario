@@ -79,11 +79,11 @@ public class LevelViewModel {
     }
 
     public void playerJump(float delta) {
-        player.addAcceleration(0, 400);
+        player.addAcceleration(0, 800);
     }
 
     public void updatePlayerForces() {
-        player.update(Gdx.graphics.getDeltaTime());
+        player.update(Gdx.graphics.getDeltaTime(), getBaseMovement());
     }
 
     public void applyBottomForce() {
@@ -98,7 +98,7 @@ public class LevelViewModel {
             Rectangle rect = new Rectangle(block.getPosition().x * getTileToPixelMultiplier(),
                     block.getPosition().y * getTileToPixelMultiplier(),
                     getTileToPixelMultiplier(), getTileToPixelMultiplier());
-            if(playerIfMoved.overlaps(rect)) {
+            if(playerIfMoved.overlaps(rect) && rect.x <= playerIfMoved.getX()) {
                 return true;
             }
         }

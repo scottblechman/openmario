@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Player {
 
-    private final int MASS = 32;
+    private final float MASS = 4f;
 
     private final Vector2 position;
     private final Vector2 velocity;
@@ -44,7 +44,7 @@ public class Player {
         return acceleration;
     }
 
-    public int getMass() {
+    public float getMass() {
         return MASS;
     }
 
@@ -63,6 +63,11 @@ public class Player {
         this.acceleration.y = acceleration.y;
     }
 
+    public void addVelocity(float x, float y) {
+        this.velocity.x += x;
+        this.velocity.y += y;
+    }
+
     public void addAcceleration(float x, float y) {
         this.acceleration.x += x;
         this.acceleration.y += y;
@@ -72,11 +77,11 @@ public class Player {
         isOnSurface = onSurface;
     }
 
-    public void update(float delta) {
+    public void update(float delta, float baseMovement) {
         velocity.x += acceleration.x;
-        velocity.y += acceleration.y ;
+        velocity.y += acceleration.y;
 
-        velocity.y += gravityAcceleration.y;
+        velocity.y += gravityAcceleration.y * MASS;
 
         // Update velocity from external forces
         if(isOnSurface && velocity.y < 0) {

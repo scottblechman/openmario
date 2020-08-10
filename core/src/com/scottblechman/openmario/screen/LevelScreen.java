@@ -99,34 +99,14 @@ public class LevelScreen implements Screen, ScreenInterface {
 
     @Override
     public void update() {
-        // Input state should only be non-empty if a key is currently pressed.
-        if(!Gdx.input.isKeyPressed(Input.Keys.ANY_KEY)) {
-            game.inputStateManager.setState(NONE);
-        } else {
-            if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-                game.inputStateManager.setState(LEFT);
-            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-                game.inputStateManager.setState(RIGHT);
-            if (Gdx.input.isKeyPressed(Input.Keys.SPACE))
-                game.inputStateManager.setState(JUMP);
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && viewModel.getPlayerPosition().x > camera.position.x - camera.viewportWidth / 2) {
+            viewModel.movePlayerLeft(game.windowScale, Gdx.graphics.getDeltaTime());
         }
-
-        InputState inputEvent = game.inputStateManager.getState();
-        switch (inputEvent) {
-            case LEFT:
-                if(viewModel.getPlayerPosition().x > camera.position.x - camera.viewportWidth / 2) {
-                    viewModel.movePlayerLeft(game.windowScale, Gdx.graphics.getDeltaTime());
-                }
-                break;
-            case RIGHT:
-                viewModel.movePlayerRight(game.windowScale, Gdx.graphics.getDeltaTime());
-                break;
-            case JUMP:
-                if(viewModel.playerIsOnSurface(blocksInViewport))
-                    viewModel.playerJump(Gdx.graphics.getDeltaTime());
-            case NONE:
-            default:
-                break;
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            viewModel.movePlayerRight(game.windowScale, Gdx.graphics.getDeltaTime());
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE) && viewModel.playerIsOnSurface(blocksInViewport)) {
+            viewModel.playerJump(Gdx.graphics.getDeltaTime());
         }
 
         if(viewModel.canAdvanceCamera(camera.position)) {
@@ -139,20 +119,33 @@ public class LevelScreen implements Screen, ScreenInterface {
             updateTilesInViewport();
         }
 
-        if(viewModel.playerIsOnSurface(blocksInViewport)) {
+        if(viewModel.playerIsOnSurface(blocksInViewport) || xDirectionCollision() || yDirectionCollision()) {
             viewModel.applyBottomForce();
         }
         viewModel.updatePlayerForces();
 
         rectPlayer.x = viewModel.getPlayerPosition().x;
         rectPlayer.y = viewModel.getPlayerPosition().y;
-        if(yDirectionCollision()) {
-            rectPlayer.setPosition(new Vector2(rectPlayer.x, snapToGrid(rectPlayer.y)));
-            viewModel.setPlayerPosition(viewModel.getPlayerPosition().x, rectPlayer.y);
-        } else if(xDirectionCollision()) {
-            rectPlayer.setPosition(new Vector2(snapToGrid(rectPlayer.x), rectPlayer.y));
-            viewModel.setPlayerPosition(rectPlayer.x, viewModel.getPlayerPosition().y);
+
+        // Fix collision errors and adjust position accordingly
+        Vector2 correctedPosition = correctCollisions(viewModel.getPlayerPosition());
+        rectPlayer.setPosition(correctedPosition);
+        viewModel.setPlayerPosition(correctedPosition.x, correctedPosition.y);
+    }
+
+    private Vector2 correctCollisions(Vector2 originalPosition) {
+        boolean xCollision = xDirectionCollision();
+        boolean yCollision = yDirectionCollision();
+
+        if(xCollision) {
+            originalPosition.x = snapToGrid(originalPosition.x);
         }
+
+        if(yCollision) {
+            originalPosition.y = snapToGrid(originalPosition.y);
+        }
+
+        return originalPosition;
     }
 
     private boolean yDirectionCollision() {
@@ -161,7 +154,9 @@ public class LevelScreen implements Screen, ScreenInterface {
                     block.getPosition().y * getTileToPixelMultiplier(),
                     getTileToPixelMultiplier(), getTileToPixelMultiplier());
 
-            if(rectPlayer.overlaps(rect) && rect.y != rectPlayer.y) {
+            float xDifference = Math.max(rectPlayer.x - rect.x, (rect.x + rect.width) - (rectPlayer.x + rectPlayer.width));
+            float yDifference = Math.max(rectPlayer.y - rect.y, (rect.y + rect.height) - (rectPlayer.y + rectPlayer.height));
+            if(rectPlayer.overlaps(rect) && yDifference > xDifference) {
                 return true;
             }
         }
@@ -174,7 +169,9 @@ public class LevelScreen implements Screen, ScreenInterface {
                     block.getPosition().y * getTileToPixelMultiplier(),
                     getTileToPixelMultiplier(), getTileToPixelMultiplier());
 
-            if(rectPlayer.overlaps(rect) && rect.x != rectPlayer.x) {
+            float xDifference = Math.max(rectPlayer.x - rect.x, (rect.x + rect.width) - rectPlayer.x);
+            float yDifference = Math.max(rectPlayer.y - rect.y, (rect.y + rect.height) - rectPlayer.y);
+            if(rectPlayer.overlaps(rect) && xDifference > yDifference) {
                 return true;
             }
         }
